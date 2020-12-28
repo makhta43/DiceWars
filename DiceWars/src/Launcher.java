@@ -1,35 +1,28 @@
-import java.util.Arrays;
+import java.io.File;
 import java.util.Scanner;
 
 public class Launcher {
-	public static void main(final String[] args) {
-		
-		int numOfPlayers = 6;
+	public static void main(final String[] args) throws Exception {
+		boolean tryToCatch = false;
+		int numOfPlayers = 0;
+		Scanner in = new Scanner(System.in);
 
-		final Map m = new Map(numOfPlayers);
+		// This do while only allows inputs between 2 and 6
+		do {
+			System.out.println("Enter number of players (2 to 6): ");
+			if (in.hasNextInt()) {
+				tryToCatch = true;
+				numOfPlayers = in.nextInt();
+			} else {
+				in.nextLine();
+			}
+		} while (tryToCatch == false || numOfPlayers < 2 || numOfPlayers > 6);
+
+		final Map m = new Map(new File("map.csv")); // Creates map using CSV file
+//		final Map m = new Map(numOfPlayers);		// Creates a random map
 		Game g = new Game(numOfPlayers, m);
 		System.out.println("\n=====================================\n");
-
-		
-		// # The code bellow simply prints out the 2D array that makes up the map. It doesn't change anything but is a useful visual aid
-//		System.out.println("/////////////////////////////////////////////\nThe Whole Map:\n"
-//				+ Arrays.deepToString(m.territoryMap).replace("], ", "]\n").replace("[[", "[").replace("]]", "]"));
-
-		Scanner in = new Scanner(System.in);
-		System.out.println("This tests the attackTerritory() Method:  ");
-		for (Territory t : g.getlistOfPlayers()[1].getTerritories()) {
-			System.out.println(t.getId());
-		}
-		for (Territory t : g.getlistOfPlayers()[1].getTerritories()) {
-			System.out.println(t.getListOfNeighbourId());
-		}
-		System.out.println("Now choose a friendly ID");
-		int f = in.nextInt();
-		System.out.println("Now choose a neighbouring enemy ID");
-		int h = in.nextInt();
-		g.getlistOfPlayers()[1].isFriendly(f, h);
-//		g.getlistOfPlayers()[1].attackTerritory(f, h);
+		g.runGame(m);
 		in.close();
-
 	}
 }

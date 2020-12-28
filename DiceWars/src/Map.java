@@ -1,5 +1,10 @@
 import java.util.List;
 import java.awt.Point;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -11,6 +16,13 @@ public class Map {
 	public Map(int numOfPlayers) {
 		this.setMapSize(numOfPlayers);
 		this.fillMap();
+		this.findNeighbours();
+		this.getListOfTerritories();
+	}
+
+	// Constructor uses external CSV file to initialise the map
+	public Map(File f) throws Exception {
+		this.readCSV(f);
 		this.findNeighbours();
 		this.getListOfTerritories();
 	}
@@ -125,8 +137,41 @@ public class Map {
 	private void getListOfTerritories() {
 		for (int row = 0; row < this.territoryMap.length; ++row) {
 			for (int col = 0; col < this.territoryMap[row].length; ++col) {
-				if (this.territoryMap[row][col].getId() != null) {
+				if (this.territoryMap[row][col].getId() != 0) {
 					validTerritories.add(new Point(row, col));
+				}
+			}
+		}
+	}
+
+	private void readCSV(File f) throws Exception {
+		BufferedReader br = new BufferedReader(new FileReader(f));
+		String cell;
+		String[] values;
+		String[][] stringMap = null;
+		int index = 0;
+		boolean runOnce = false;
+
+		while ((cell = br.readLine()) != null) {
+			values = cell.split(",");
+			if (!runOnce) {
+				stringMap = new String[values.length][values.length];
+				runOnce = true;
+			}
+			for (int i = 0; i < stringMap.length; i++) {
+				stringMap[index][i] = values[i];
+			}
+			index++;
+		}
+		br.close();
+		this.territoryMap = new Territory[stringMap.length][stringMap.length];
+		for (int i = 0; i < stringMap.length; i++) {
+			for (int j = 0; j < stringMap[i].length; j++) {
+				if (stringMap[i][j].equals("1")) {
+					territoryMap[i][j] = new Territory();
+				} else {
+					territoryMap[i][j] = new Territory();
+					territoryMap[i][j].setId(0);
 				}
 			}
 		}

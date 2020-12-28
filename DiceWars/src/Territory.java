@@ -1,13 +1,15 @@
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Territory {
+public class Territory implements Serializable{
 	private static final AtomicInteger count;
 	private Integer id;
 	private int playerId;
 	private int strength;
 	private List<Integer> listOfNeighbourId;
 
+	// This code ensures that every Territory has a unique ID
 	static {
 		count = new AtomicInteger(0);
 	}
