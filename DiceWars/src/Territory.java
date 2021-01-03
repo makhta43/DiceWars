@@ -1,8 +1,9 @@
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Territory implements Serializable{
+public class Territory implements Serializable {
 	private static final AtomicInteger count;
 	private Integer id;
 	private int playerId;
@@ -16,6 +17,20 @@ public class Territory implements Serializable{
 
 	public Territory() {
 		this.id = Territory.count.incrementAndGet();
+	}
+
+	public List<Territory> enemyNeighbours(Map m) {
+		List<Territory> listOfEnemyNeighbours = new ArrayList<Territory>();
+		for (Territory[] territoryList : m.territoryMap) {
+			for (Territory territory : territoryList) {
+				for (int neighbourId : this.listOfNeighbourId) {
+					if (territory.getId() == neighbourId && territory.getPlayerId() != this.getPlayerId()) {
+						listOfEnemyNeighbours.add(territory);
+					}
+				}
+			}
+		}
+		return listOfEnemyNeighbours;
 	}
 
 	public Integer getId() {
@@ -37,7 +52,7 @@ public class Territory implements Serializable{
 	public void setStrength(final Integer strength) {
 		this.strength = strength;
 	}
-	
+
 	public Integer getPlayerId() {
 		return this.playerId;
 	}

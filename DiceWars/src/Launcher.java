@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.Scanner;
 
 public class Launcher {
@@ -18,8 +17,8 @@ public class Launcher {
 			}
 		} while (tryToCatch == false || numOfPlayers < 2 || numOfPlayers > 6);
 
-		final Map m = new Map(new File("map.csv")); // Creates map using CSV file
-//		final Map m = new Map(numOfPlayers);		// Creates a random map
+//		final Map m = new Map(new File("map.csv")); // Creates map using CSV file
+		final Map m = new Map(numOfPlayers);		// Creates a random map
 		Game g = new Game(numOfPlayers, m);
 		System.out.println("\n=====================================\n");
 		g.runGame(m);

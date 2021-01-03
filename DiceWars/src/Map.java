@@ -2,9 +2,7 @@ import java.util.List;
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -67,7 +65,7 @@ public class Map {
 		for (int i = 0; i < 10; ++i) {
 			final Random rand = new Random();
 			this.territoryMap[rand.nextInt(this.territoryMap.length)][rand.nextInt(this.territoryMap.length)]
-					.setId((Integer) null);
+					.setId(0);
 		}
 		System.out.println(" - Map filled with territories");
 	}
@@ -137,8 +135,10 @@ public class Map {
 	private void getListOfTerritories() {
 		for (int row = 0; row < this.territoryMap.length; ++row) {
 			for (int col = 0; col < this.territoryMap[row].length; ++col) {
-				if (this.territoryMap[row][col].getId() != 0) {
-					validTerritories.add(new Point(row, col));
+				if (this.territoryMap[row][col].getId() != null) {
+					if (this.territoryMap[row][col].getId() != 0) {
+						validTerritories.add(new Point(row, col));
+					}
 				}
 			}
 		}

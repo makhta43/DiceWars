@@ -17,14 +17,10 @@ public class Player {
 		this.id = Player.count.incrementAndGet();
 	}
 
-	// When this method is run on a player, you must pass it a friendly (owned)
-	// params are - territoryID and a *neighbouring* enemyID
-	// == WARNING: This method might extend what it's meant to do into the functions
-	// of other methods and might need a rewrite ==
-	public void attackTerritory(int playerTerr, int enemyTerr, Map m) {
-		Random r = new Random();
+	// Method is parsed two territoryID's. One friendly, one enemy
+	// == WARNING: Needs functions to be split up into methods
+	public void attackTerritory(int playerTerr, int enemyTerr, Map m, Player[] ls) {
 		List<Integer> territoryId = new ArrayList<Integer>();
-		int max1, max2;
 		for (Territory t : this.territories) {
 			territoryId.add(t.getId());
 		}
@@ -35,19 +31,30 @@ public class Player {
 							&& this.territories.get(i).getStrength() != 1) {
 						for (int row = 0; row < m.territoryMap.length; ++row) {
 							for (int col = 0; col < m.territoryMap[row].length; ++col) {
-								if (m.territoryMap[row][col].getId() != null) {
+								if (m.territoryMap[row][col].getId() != 0) {
 									if (m.territoryMap[row][col].getId() == enemyTerr) {
-										max1 = this.territories.get(i).getStrength() * 6;
+										int youRoll = rollDice(this.territories.get(i).getStrength());
+										int theyRolled = rollDice(m.territoryMap[row][col].getStrength());
 										System.out.println("You have " + this.territories.get(i).getStrength()
-												+ " dice. and you rolled: " + (r.nextInt((max1 - 1) + 1) + 1));
-										max2 = m.territoryMap[row][col].getStrength() * 6;
+												+ " dice. and you rolled: " + (youRoll));
 										System.out.println("Enemy has " + m.territoryMap[row][col].getStrength()
-												+ " dice. and they rolled: " + (r.nextInt((max2 - 1) + 1) + 1));
-										if (r.nextInt((max1 - 1) + 1) + 1 > r.nextInt((max2 - 1) + 1) + 1) {
+												+ " dice. and they rolled: " + (theyRolled));
+										if (youRoll > theyRolled) {
 											System.out.println("You win");
+											for (Player player : ls) {
+												if (player.getId() == m.territoryMap[row][col].getPlayerId()) {
+													for (int j = 0; j < player.territories.size(); j++) {
+														if (player.territories.get(j)
+																.getId() == m.territoryMap[row][col].getId()) {
+															player.territories.remove(j);
+														}
+													}
+												}
+											}
 											m.territoryMap[row][col].setPlayerId(this.id);
 											m.territoryMap[row][col]
 													.setStrength(this.territories.get(i).getStrength() - 1);
+											this.territories.add(m.territoryMap[row][col]);
 											this.territories.get(i).setStrength(1);
 										} else {
 											System.out.println("You lose");
@@ -64,7 +71,44 @@ public class Player {
 	}
 
 	public void endTurn() {
-		System.out.println("End Turn");
+		Random r = new Random();
+		boolean hasInc;
+		int randomTerritory;
+		int numOfTerritories = this.getTerritories().size();
+		for (int i = 0; i < numOfTerritories; i++) {
+			if (this.totalStrength() < (this.getTerritories().size() * 8)) {
+				hasInc = false;
+				while (!hasInc) {
+					randomTerritory = r.nextInt(numOfTerritories);
+					if ((territories.get(randomTerritory).getStrength() + 1) <= 8) {
+						this.territories.get(randomTerritory)
+								.setStrength(territories.get(randomTerritory).getStrength() + 1);
+						hasInc = true;
+					}
+				}
+			}
+		}
+		System.out.println(" - END TURN -");
+	}
+
+	public int totalStrength() {
+		int total = 0;
+		for (Territory territory : territories) {
+			total = total + territory.getStrength();
+		}
+		return total;
+	}
+
+	private int rollDice(int strength) {
+		int outcome = 0;
+		int randNum;
+		Random r = new Random();
+		for (int i = 0; i < strength; i++) {
+			randNum = r.nextInt(6) + 1;
+			outcome = outcome + randNum;
+		}
+
+		return outcome;
 	}
 
 	public int getId() {

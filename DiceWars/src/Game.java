@@ -1,4 +1,5 @@
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -63,13 +64,15 @@ public class Game {
 
 		for (Player p : listOfPlayers) {
 			hasZero = hasZero(p.getTerritories());
-			while (hasZero == true) {
+			while (hasZero) {
 				for (int i = 0; i < p.getTerritories().size(); i++) {
 					p.getTerritories().get(i).setStrength(0);
 				}
 				for (int i = 0; i < 20; i++) {
 					int r = rand.nextInt(p.getTerritories().size());
-					p.getTerritories().get(r).setStrength(p.getTerritories().get(r).getStrength() + 1);
+					if ((p.getTerritories().get(r).getStrength() + 1) < 8) {
+						p.getTerritories().get(r).setStrength(p.getTerritories().get(r).getStrength() + 1);
+					}
 				}
 				hasZero = hasZero(p.getTerritories());
 			}
@@ -92,7 +95,7 @@ public class Game {
 	}
 
 	// Shuffles players for random order
-	public void shufflePlayers() {
+	private void shufflePlayers() {
 		List<Player> tempList = Arrays.asList(listOfPlayers);
 		Collections.shuffle(tempList);
 		tempList.toArray(listOfPlayers);
@@ -101,55 +104,97 @@ public class Game {
 	// Runs the game in terminal as a text based game. C'est semi fonctionnel
 	public void runGame(Map m) {
 		Scanner in = new Scanner(System.in);
-		while (this.getlistOfPlayers().length != 1) {
-			System.out.println("Current Status of the map: <<[territoryID,strength]>>");
-			for (Territory[] t : m.territoryMap) {
-				for (Territory t1 : t) {
-					System.out.print("[" + t1.getPlayerId() + "," + t1.getStrength() + "]");
-				}
-				System.out.println();
-			}
+		List<Territory> enemyNeighbour = null;
+		int nullCounter = 0;
+		while (nullCounter != this.listOfPlayers.length - 1) {
 			for (Player currentPlayer : this.getlistOfPlayers()) {
-				System.out.println("-----------\nPlayer " + currentPlayer.getId()
-						+ "'s turn\nWould you like to attack or end your turn?\na = attack\ne = end turn");
-				String res = in.next();
-				while (!res.equals("e")) {
-					if (res.equals("a")) {
-						System.out
-								.println("Enter a friendly Territory from the list below: <<[territoryId,strength]>>");
-						for (Territory t : currentPlayer.getTerritories()) {
-							System.out.print("[" + t.getId() + "," + t.getStrength() + "]");
+				if (currentPlayer.getTerritories().size() == 0) {
+					System.out.println("========================= Player " + currentPlayer.getId()
+							+ " has lost all their territories =========================\nPlayers remaining are: ");
+					currentPlayer.setId(0);
+					for (Player p : this.getlistOfPlayers()) {
+						if (p.getId()!=0) {
+							System.out.print(p.getId()+", ");
 						}
-						System.out.println();
-						int res1 = in.nextInt();
-						System.out.println(
-								"Enter a neighbouring enemy Territory from the list below: <<[territoryId,strength]>>");
-						for (Territory t : currentPlayer.getTerritories()) {
-							if (t.getId() == res1) {
-								for (int neighbour : t.getListOfNeighbourId()) {
-									for (Territory[] t1 : m.territoryMap) {
-										for (Territory t2 : t1) {
-											if (t2.getId() != null) {
-												if (t2.getId() == neighbour) {
-													System.out.print("[" + t2.getId() + "," + t2.getStrength() + "]");
-												}
-											}
-										}
-									}
+					}
+					System.out.println();
+					nullCounter++;
+				}
+				System.out.println("Current Status of the map: <<[playerID,strength]>>");
+				for (Territory[] t : m.territoryMap) {
+					for (Territory t1 : t) {
+						System.out.print("[" + t1.getPlayerId() + "," + t1.getStrength() + "]");
+					}
+					System.out.println();
+				}
+				if (currentPlayer != null) {
+					System.out.println("-----------\nPlayer " + currentPlayer.getId()
+							+ "'s turn\nWould you like to attack or end your turn?\na = attack\ne = end turn");
+					String res = in.next();
+					while (!res.equalsIgnoreCase("e")) {
+						if (res.equalsIgnoreCase("a")) {
+							System.out.println(
+									"Enter a friendly Territory from the list below: <<[territoryId,strength]>>\n== Only strength > 1 is shown and territories with neighbouring enemies ==");
+							for (Territory t : currentPlayer.getTerritories()) {
+								if (t.getStrength() > 1 && t.enemyNeighbours(m).size() > 0) {
+									System.out.print("[" + t.getId() + "," + t.getStrength() + "]");
 								}
 							}
+							System.out.println();
+							int res1 = in.nextInt();
+							System.out.println(
+									"Enter a neighbouring enemy Territory from the list below: <<[territoryId,strength]>>");
+							enemyNeighbour = enemyNeighbours(res1, m);
+							for (int i = 0; i < enemyNeighbour.size(); i++) {
+								System.out.print("[" + enemyNeighbour.get(i).getId() + ","
+										+ enemyNeighbour.get(i).getStrength() + "]");
+							}
+							System.out.println();
+							int res2 = in.nextInt();
+							currentPlayer.attackTerritory(res1, res2, m, listOfPlayers);
+							System.out.println("-----------\nPlayer " + currentPlayer.getId()
+									+ "'s turn\nWould you like to attack or end your turn?\na = attack\ne=end turn");
+							res = in.next();
 						}
-						System.out.println();
-						int res2 = in.nextInt();
-						currentPlayer.attackTerritory(res1, res2, m);
-						System.out.println("-----------\nPlayer " + currentPlayer.getId()
-								+ "'s turn\nWould you like to attack or end your turn?\na = attack\ne=end turn");
-						res = in.next();
+					}
+					currentPlayer.endTurn();
+				}
+			}
+		}
+		for (Player p : this.getlistOfPlayers()) {
+			if (p!=null) {
+				System.out.println("Player "+p.getId()+" WINS!!");
+				System.out.println("You won out of " + this.getlistOfPlayers().length + " players");
+				System.out.println("Total strength: " + p.totalStrength());
+				System.out.println("Total territories captured: " + p.getTerritories().size());
+				System.exit(0);
+			}
+		}
+
+		in.close();
+
+	}
+
+	private List<Territory> enemyNeighbours(int territoryId, Map m) {
+		List<Territory> listOfEnemyNeighbours = new ArrayList<Territory>();
+		Territory current = null;
+		for (Territory[] territoryList : m.territoryMap) {
+			for (Territory territory : territoryList) {
+				if (territory.getId() == territoryId) {
+					current = territory;
+				}
+			}
+		}
+		for (Integer neighbourId : current.getListOfNeighbourId()) {
+			for (Territory[] territoryList : m.territoryMap) {
+				for (Territory territory : territoryList) {
+					if (neighbourId == territory.getId() && current.getPlayerId() != territory.getPlayerId()) {
+						listOfEnemyNeighbours.add(territory);
 					}
 				}
 			}
 		}
-		in.close();
+		return listOfEnemyNeighbours;
 	}
 
 	public int getnumOfPlayers() {
