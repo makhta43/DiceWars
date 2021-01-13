@@ -1,3 +1,4 @@
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,8 +19,8 @@ public class Player {
 	}
 
 	// Method is parsed two territoryID's. One friendly, one enemy
-	// == WARNING: Needs functions to be split up into methods
-	public void attackTerritory(int playerTerr, int enemyTerr, Map m, Player[] ls) {
+	public Point attackTerritory(int playerTerr, int enemyTerr, Map m, Player[] ls) {
+		Point p = new Point();
 		List<Integer> territoryId = new ArrayList<Integer>();
 		for (Territory t : this.territories) {
 			territoryId.add(t.getId());
@@ -35,12 +36,9 @@ public class Player {
 									if (m.territoryMap[row][col].getId() == enemyTerr) {
 										int youRoll = rollDice(this.territories.get(i).getStrength());
 										int theyRolled = rollDice(m.territoryMap[row][col].getStrength());
-										System.out.println("You have " + this.territories.get(i).getStrength()
-												+ " dice. and you rolled: " + (youRoll));
-										System.out.println("Enemy has " + m.territoryMap[row][col].getStrength()
-												+ " dice. and they rolled: " + (theyRolled));
+										p.x=youRoll;
+										p.y=theyRolled;
 										if (youRoll > theyRolled) {
-											System.out.println("You win");
 											for (Player player : ls) {
 												if (player.getId() == m.territoryMap[row][col].getPlayerId()) {
 													for (int j = 0; j < player.territories.size(); j++) {
@@ -56,9 +54,10 @@ public class Player {
 													.setStrength(this.territories.get(i).getStrength() - 1);
 											this.territories.add(m.territoryMap[row][col]);
 											this.territories.get(i).setStrength(1);
+											return p;
 										} else {
-											System.out.println("You lose");
 											this.territories.get(i).setStrength(1);
+											return p;
 										}
 									}
 								}
@@ -68,6 +67,7 @@ public class Player {
 				}
 			}
 		}
+		return null;
 	}
 
 	public void endTurn() {
@@ -88,7 +88,6 @@ public class Player {
 				}
 			}
 		}
-		System.out.println(" - END TURN -");
 	}
 
 	public int totalStrength() {
@@ -125,5 +124,8 @@ public class Player {
 
 	public void setTerritories(final List<Territory> territories) {
 		this.territories = territories;
+	}
+	public void setAtomic(int i) {
+		Player.count.set(i);
 	}
 }

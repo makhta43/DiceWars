@@ -64,6 +64,9 @@ public class Territory implements Serializable {
 	public List<Integer> getListOfNeighbourId() {
 		return listOfNeighbourId;
 	}
+	public void setAtomic(int i) {
+		Territory.count.set(i);
+	}
 
 	@Override
 	public String toString() {

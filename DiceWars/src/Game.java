@@ -101,7 +101,8 @@ public class Game {
 		tempList.toArray(listOfPlayers);
 	}
 
-	// Runs the game in terminal as a text based game. C'est semi fonctionnel
+	// Runs the game in terminal as a text based game
+	//None of this method is used in the final GUI version of the game
 	public void runGame(Map m) {
 		Scanner in = new Scanner(System.in);
 		List<Territory> enemyNeighbour = null;
@@ -172,7 +173,6 @@ public class Game {
 		}
 
 		in.close();
-
 	}
 
 	private List<Territory> enemyNeighbours(int territoryId, Map m) {

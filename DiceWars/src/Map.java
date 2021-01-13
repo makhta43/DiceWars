@@ -55,7 +55,6 @@ public class Map {
 
 	// Iterates through the 2D-array to fill it with territories
 	// Second part of this code adds random gaps inbetween the territories (GAPS
-	// CONTAIN TERRITORIES WHO'S ID == NULL)
 	private void fillMap() {
 		for (int row = 0; row < this.territoryMap.length; ++row) {
 			for (int col = 0; col < this.territoryMap[row].length; ++col) {
